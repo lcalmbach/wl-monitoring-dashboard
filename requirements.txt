@@ -3,7 +3,7 @@ hvplot
 matplotlib 
 numpy 
 pandas 
-panel 
+panel==1.6.2 
 plotly 
 scipy 
 watchfiles
