@@ -6,6 +6,10 @@ import folium
 from groundwater import Groundwater
 
 pn.extension("vega", "tabulator")
+
+pn.extension(sizing_mode="stretch_width", template="material")
+pn.config.raw_css.append("body { background: yellow; }")
+
 alt.themes.enable("default")  # fallback
 
 ACCENT = "teal"
