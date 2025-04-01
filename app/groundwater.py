@@ -4,7 +4,7 @@ import altair as alt
 import calendar
 import folium
 
-datapath = Path("data")
+datapath = Path("app") / "data"
 identifier = "100064"
 csv_file = datapath / f"{identifier}.csv"
 parquet_data_file = datapath / "100064_final.parquet"
