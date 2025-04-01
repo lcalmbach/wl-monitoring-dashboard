@@ -6,6 +6,8 @@ import folium
 from groundwater import Groundwater
 
 pn.extension("vega", "tabulator")
+pn.extension(sizing_mode="stretch_width", template="material")
+pn.config.raw_css.append("body { background: yellow; }")
 alt.themes.enable("default")  # fallback
 
 ACCENT = "teal"
@@ -73,10 +75,9 @@ def update_view(station, year):
 tabs = pn.bind(update_view, selected_station, selected_year)
 
 # Template
-pn.template.FastListTemplate(
+pn.template.MaterialTemplate(
     title="Grundwassermonitoring Basel-Stadt",
     sidebar=[selected_station, selected_year],
     main=[tabs],
-    main_layout=None,
     accent=ACCENT,
 ).servable()
