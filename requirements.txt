@@ -1,9 +1,7 @@
 altair 
 hvplot 
-matplotlib 
 numpy 
 pandas 
 panel
 bokeh
-plotly 
 scipy 

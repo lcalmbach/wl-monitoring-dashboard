@@ -1,16 +1,10 @@
-import hvplot.pandas
+
 import pandas as pd
 import panel as pn
 import altair as alt
-import folium
 from groundwater import Groundwater
 
-pn.extension("vega", "tabulator")
-
-pn.extension(sizing_mode="stretch_width", template="material")
-pn.config.raw_css.append("body { background: yellow; }")
-
-alt.themes.enable("default")  # fallback
+pn.extension("vega", sizing_mode="stretch_width")
 
 ACCENT = "teal"
 styles = {
