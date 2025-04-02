@@ -6,3 +6,4 @@ panel
 bokeh
 scipy 
 folium
+fastparquet
