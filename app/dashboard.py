@@ -1,7 +1,9 @@
 
 import panel as pn
+import pandas as pd
+import altair as alt
+from groundwater import Groundwater
 
-pn.extension(sizing_mode="stretch_width")
 pn.extension(sizing_mode="stretch_width")
 
 component1 = pn.pane.Markdown("# Welcome to Component 1")
