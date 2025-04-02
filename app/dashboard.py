@@ -70,10 +70,20 @@ def update_view(station, year):
 # Bind dynamic content
 tabs = pn.bind(update_view, selected_station, selected_year)
 
+
+component1 = pn.pane.Markdown("# Welcome to Component 1")
+component2 = pn.pane.Markdown("# Welcome to Component 2")
+component3 = pn.pane.Markdown("# Welcome to test 2")
+
 # Template
-page = pn.template.MaterialTemplate(
+page_old = pn.template.MaterialTemplate(
     title="Grundwassermonitoring Basel-Stadt",
     sidebar=[selected_station, selected_year],
     main=[tabs]
+)
+page = pn.template.MaterialTemplate(
+    title="Grundwassermonitoring Basel-Stadt",
+    sidebar=[component1, component2],
+    main=[component3]
 )
 page.servable()
