@@ -1,1 +1,1 @@
-web: panel serve app/test.py --port=$PORT --address=0.0.0.0 --allow-websocket-origin=*
+web: panel serve app/test.py --port=$PORT --address=0.0.0.0 --allow-websocket-origin=wl-monitoring-dashboard-3a814746f414.herokuapp.com
