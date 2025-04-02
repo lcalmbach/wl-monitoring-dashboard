@@ -4,7 +4,7 @@ import panel as pn
 import altair as alt
 from groundwater import Groundwater
 
-pn.extension("vega", sizing_mode="stretch_width")
+pn.extension("vega", "tabulator", sizing_mode="stretch_width")
 
 ACCENT = "teal"
 styles = {
@@ -71,8 +71,9 @@ def update_view(station, year):
 tabs = pn.bind(update_view, selected_station, selected_year)
 
 # Template
-pn.template.MaterialTemplate(
+page = pn.template.MaterialTemplate(
     title="Grundwassermonitoring Basel-Stadt",
     sidebar=[selected_station, selected_year],
     main=[tabs]
-).servable()
+)
+page.servable()
