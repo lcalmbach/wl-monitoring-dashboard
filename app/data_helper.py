@@ -5,26 +5,14 @@ from datetime import datetime
 
 datapath = Path("./data")
 identifier = "100064"
+
 csv_data_file = datapath / f"{identifier}.csv"
 parquet_data_file = datapath / f"{identifier}.parquet"
 parquet_final_data_file = datapath / f"{identifier}_final.parquet"
 csv_station_file = datapath / f"{identifier}_stations.csv"
 parquet_station_file = datapath / f"{identifier}_stations.parquet"
-
-base_url = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100164/exports/csv"
-params = {
-    "lang": "de",
-    "timezone": "Europe/Zurich",
-    "use_labels": "false",
-    "delimiter": ";",
-    "select": "timestamp,stationnr,stationname,value,lat,lon",
-    "where": "timestamp >= '1976-01-01' and timestamp <'1977-01-01'",
-}
-station_fields = ["stationnr", "stationname", "lat", "lon"]
-value_fields = ["timestamp", "stationnr", "value"]
-query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
-full_url = f"{base_url}?{query_string}"
-
+parquet_kataster_file = datapath / f"bohrloch_kataster.parquet"
+parquet_precipitation_file = datapath / f"precipitation.parquet"
 
 def get_data():
     """
@@ -44,7 +32,7 @@ def get_data():
     7. Writes the processed data and station information to Parquet and CSV files.
 
     Outputs:
-    - A Parquet file containing the processed data for all years.
+    - A Parquet file containing the bohrloch_katasterprocessed data for all years.
     - A CSV file containing the processed data for all years.
     - A Parquet file containing unique station information.
     - A CSV file containing unique station information.
@@ -52,13 +40,26 @@ def get_data():
     Note:
     - The function assumes the existence of certain global variables such as `params`, 
       `base_url`, `station_fields`, `value_fields`, `parquet_data_file`, 
-      `csv_data_file`, `parquet_station_file`, and `csv_station_file`.
     - The function uses pandas for data manipulation and urllib for URL encoding.
 
     Raises:
     - Any exceptions related to HTTP requests or file I/O operations.
     - ValueErrors if the data processing steps encounter unexpected formats.
     """
+    base_url = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100164/exports/csv"
+    params = {
+        "lang": "de",
+        "timezone": "Europe/Zurich",
+        "use_labels": "false",
+        "delimiter": ";",
+        "select": "timestamp,stationnr,stationname,value,lat,lon",
+        "where": "timestamp >= '1976-01-01' and timestamp <'1977-01-01'",
+    }
+    station_fields = ["stationnr", "stationname", "lat", "lon"]
+    value_fields = ["timestamp", "stationnr", "value"]
+    query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+    full_url = f"{base_url}?{query_string}"
+
     data = []
     years = range(1976, datetime.now().year + 1)
     for year in years:
@@ -72,18 +73,50 @@ def get_data():
         data.append(df)
     df_all_years = pd.concat(data, ignore_index=True)
     df_stations = df_all_years[station_fields].drop_duplicates()
-    print(f"writing data files: {parquet_data_file.name}")
+    print(f"writing data files: {parquet_precipitation_file.name}")
     df_all_years[value_fields].to_parquet(parquet_data_file)
-    df_all_years[value_fields].to_csv(csv_data_file, sep=";")
 
     print(f"writing station files: {parquet_station_file.name}")
-    df_stations.to_csv(csv_station_file, sep=";")
     df_stations.to_parquet(parquet_station_file)
 
+def get_kataster_data():
+    base_url = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100182/exports/csv"
+    params = {
+        "lang": "de",
+        "timezone": "Europe/Zurich",
+        "use_labels": "false",
+        "delimiter": ";",
+        "where": "grundwasserdaten = '1'",
+    }
+    query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+    full_url = f"{base_url}?{query_string}"
+    df = pd.read_csv(full_url, sep=";", low_memory=False)
+    df['catnum45'] = df["catnum45"].str.zfill(10)
+
+    df.to_parquet(parquet_kataster_file)
+
+def get_precipitation_data():
+    base_url = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100254/exports/csv"
+    params = {
+        "lang": "de",
+        "timezone": "Europe/Zurich",
+        "use_labels": "false",
+        "delimiter": ";",
+        "select": "date,jahr,rre150d0",
+    }
+    query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+    full_url = f"{base_url}?{query_string}"
+    print(full_url)
+    df = pd.read_csv(full_url, sep=";", low_memory=False)
+    df['date'] = pd.to_datetime(df['date'])
+    df['jahr']= df['jahr'].astype(int)
+    df = df[df["jahr"] >= 1976]
+    df.rename(columns={"rre150d0": "precipitation"}, inplace=True)
+    df.to_parquet(parquet_precipitation_file)
 
 def fix_station_codes():
     """
-    Fixes the station codes in the dataset by ensuring they are 10 characters long,
+    Fixes the station codes in the databinningenset by ensuring they are 10 characters long,
     padded with zeros on the left if necessary. The function processes two datasets:
     station data and yearly data, and updates them accordingly.
 
@@ -100,10 +133,9 @@ def fix_station_codes():
     7. Saves the updated yearly data to both a Parquet file and a CSV file.
 
     Note:
-    - The function assumes the existence of the following global variables:
+    -rre150d0 The function assumes the existence of the following global variables:
       - `parquet_station_file`: Path to the Parquet file containing station data.
       - `parquet_data_file`: Path to the Parquet file containing yearly data.
-      - `csv_data_file`: Path to the CSV file for saving yearly data.
       - `value_fields`: List of column names to be saved in the yearly data files.
     - The CSV file is saved with a semicolon (;) as the delimiter.
     """
@@ -115,8 +147,8 @@ def fix_station_codes():
 
     df_all_years = pd.read_parquet(parquet_data_file)
     df_all_years["stationnr"] = df_all_years["stationnr"].str.zfill(10)
+    value_fields = ["timestamp", "stationnr", "value"]
     df_all_years[value_fields].to_parquet(parquet_data_file)
-    df_all_years[value_fields].to_csv(csv_data_file, sep=";")
 
 
 def summerize_data():
@@ -164,6 +196,8 @@ def summerize_data():
     df_all_years.to_parquet(parquet_final_data_file, engine="pyarrow")
 
 
-get_data()
-fix_station_codes()
-summerize_data()
+#get_data()
+#fix_station_codes()
+#summerize_data()
+#get_kataster_data()
+get_precipitation_data()
