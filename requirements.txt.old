@@ -1,0 +1,9 @@
+altair 
+hvplot 
+matplotlib 
+numpy 
+pandas 
+panel==1.6.2 
+plotly 
+scipy 
+watchfiles

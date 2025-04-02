@@ -1,9 +1,2 @@
-altair 
-hvplot 
-matplotlib 
-numpy 
-pandas 
-panel==1.6.2 
-plotly 
-scipy 
-watchfiles
+panel==1.4.1
+bokeh==3.3.4
