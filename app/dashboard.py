@@ -5,7 +5,7 @@ import altair as alt
 from groundwater import Groundwater
 
 pn.extension("vega", "tabulator", sizing_mode="stretch_width")
-
+"""
 ACCENT = "teal"
 styles = {
     "box-shadow": "rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px",
@@ -70,17 +70,18 @@ def update_view(station, year):
 # Bind dynamic content
 tabs = pn.bind(update_view, selected_station, selected_year)
 
-
-component1 = pn.pane.Markdown("# Welcome to Component 1")
-component2 = pn.pane.Markdown("# Welcome to Component 2")
-component3 = pn.pane.Markdown("# Welcome to test 2")
-
 # Template
 page_old = pn.template.MaterialTemplate(
     title="Grundwassermonitoring Basel-Stadt",
     sidebar=[selected_station, selected_year],
     main=[tabs]
 )
+"""
+
+component1 = pn.pane.Markdown("# Welcome to Component 1")
+component2 = pn.pane.Markdown("# Welcome to Component 2")
+component3 = pn.pane.Markdown("# Welcome to test 2")
+
 page = pn.template.MaterialTemplate(
     title="Grundwassermonitoring Basel-Stadt",
     sidebar=[component1, component2],
