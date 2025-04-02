@@ -1,2 +1,2 @@
-panel==1.4.1
-bokeh==3.3.4
+panel
+bokeh
