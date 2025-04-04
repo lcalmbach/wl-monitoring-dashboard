@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 import urllib.parse
 from datetime import datetime
+import argparse
 
 datapath = Path("./data")
 identifier = "100064"
@@ -116,7 +117,7 @@ def get_precipitation_data():
 
 def fix_station_codes():
     """
-    Fixes the station codes in the databinningenset by ensuring they are 10 characters long,
+    Fixes the station codes in the data binningenset by ensuring they are 10 characters long,
     padded with zeros on the left if necessary. The function processes two datasets:
     station data and yearly data, and updates them accordingly.
 
@@ -196,8 +197,35 @@ def summerize_data():
     df_all_years.to_parquet(parquet_final_data_file, engine="pyarrow")
 
 
-#get_data()
-#fix_station_codes()
-#summerize_data()
-#get_kataster_data()
-get_precipitation_data()
+def main():
+    parser = argparse.ArgumentParser(description="Run data helper functions.")
+    
+    parser.add_argument('--data', action='store_true', help='Get all water level data, this will take a while')
+    parser.add_argument('--fix', action='store_true', help='Run fix_station_codes()')
+    parser.add_argument('--summary', action='store_true', help='Run summerize_data()')
+    parser.add_argument('--kataster', action='store_true', help='Run get_kataster_data()')
+    parser.add_argument('--precip', action='store_true', help='Run get_precipitation_data()')
+    parser.add_argument('--all', action='store_true', help='Execute all functions')
+    args = parser.parse_args()
+
+    if args.all:
+        get_data()
+        fix_station_codes()
+        summerize_data()
+        get_kataster_data()
+        get_precipitation_data()
+    if args.data:
+        get_data()
+        fix_station_codes()
+        summerize_data()
+    if args.fix:
+        fix_station_codes()
+    if args.summary:
+        summerize_data()
+    if args.kataster:
+        get_kataster_data()
+    if args.precip:
+        get_precipitation_data()
+
+if __name__ == '__main__':
+    main()
