@@ -39,8 +39,6 @@ stylesheet = """
     }
 """
 
-gw = Groundwater()
-
 def format_well_info_table(df):
     def format_cell(val):
         if isinstance(val, str) and val.startswith("http"):
@@ -56,22 +54,6 @@ def format_well_info_table(df):
     html_table = df.to_html(escape=False, index=False, header=False, classes="styled-table")
     return html_table
 
-# Widgets
-selected_station = pn.widgets.Select(
-    name="Stations",
-    value=gw.station_nrs[0],
-    options=gw.stations,
-    description="Select a station",
-)
-years = gw.get_years(selected_station.value)
-
-year_range_slider = pn.widgets.RangeSlider(
-    name='Select Year Range',
-    start=years[-1],
-    end=years[0],
-    value=(years[2], years[0]),  # Default selected range
-    step=1
-)
 
 def update_year_options(event):
 # Update year options when station changes
@@ -85,10 +67,10 @@ def update_year_options(event):
         value=(years[-1], years[0])
     )
 
-selected_station.param.watch(update_year_options, "value")
 
-# Function to update both plot and table
 def update_view(station, year_range):
+    # Function to update both plot and table
+    
     df = gw.get_plot_waterlevels_df(station, year_range)
     start_date = pd.to_datetime(df["date"].min())
     end_date = pd.to_datetime(df["date"].max())
@@ -107,7 +89,7 @@ def update_view(station, year_range):
         'x': 'date', 
         'y': 'precipitation', 
         'color': 'stationnr',
-        'title': f"Niederschlag(mm) {gw.get_station_name(station)} - {year_range[0]}-{year_range[1]}",
+        'title': f"Niederschlag(mm) {year_range[0]}-{year_range[1]}",
         'x_domain': shared_xscale
     }
     plot_precipitation = gw.get_precipitation_chart(df_prec, settings) # gw.get_precipitation_chart(year_range)
@@ -134,6 +116,28 @@ def update_view(station, year_range):
         styles=styles
     )
 
+
+# Main app logic
+gw = Groundwater()
+selected_station = pn.widgets.Select(
+    name="Stationen",
+    value=gw.station_nrs[0],
+    options=gw.stations,
+    description="Wöhle eine Station",
+)
+years = gw.get_years(selected_station.value)
+
+year_range_slider = pn.widgets.RangeSlider(
+    name='Jahresintervall',
+    start=years[-1],
+    end=years[0],
+    value=(years[2], years[0]),  # Default selected range
+    step=1
+)
+
+selected_station.param.watch(update_year_options, "value")
+
+
 # Bind dynamic content
 tabs = pn.bind(update_view, selected_station, year_range_slider)
 selected_station.margin = (20, 0, 30, 0)  # 10px bottom margin
@@ -147,7 +151,7 @@ card_styles = {
 filter_card = pn.Card(
     selected_station,
     year_range_slider,
-    title='Filter',
+    title='🔎 Filter',
     styles=card_styles,
     margin=(30, 10, 10, 10),  # 20px margin on all sides
     collapsible=False,
@@ -166,12 +170,11 @@ logo_with_link = pn.pane.HTML(f"""
 info_card = pn.pane.HTML("""
 <br><br><div style="border:1px solid #ccc; border-radius:9px; padding:10px;">
   <strong>App: </strong>Grundwassermonitoring Basel-Stadt<br>
-  <strong>Version: </strong>0.1<br>
-  <strong>Autor: </strong> <a href="mailto:lcalmbach@gmail.com">lcalmbach@gmail.com</a><br>
+  <strong>Version: </strong>2025-04-04 / v0.2<br>
+  <strong>Autor: </strong> <a href="mailto:lcalmbach@gmail.com" target="_blank">lcalmbach@gmail.com</a><br>
   <strong>Data Source:</strong> <a href="https://data.bs.ch" target="_blank">data.bs</a>
 </div>
 """, width=260)
-
 
 sidebar = pn.Column(
     logo_with_link,
@@ -183,7 +186,7 @@ sidebar = pn.Column(
 )
 
 page = pn.template.MaterialTemplate(
-    title="Grundwassermonitoring Basel-Stadt",
+    title="⛲ Grundwassermonitoring Basel-Stadt",
     sidebar=sidebar,
     main=[tabs]
 )
