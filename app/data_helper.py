@@ -15,12 +15,13 @@ parquet_station_file = datapath / f"{identifier}_stations.parquet"
 parquet_kataster_file = datapath / f"bohrloch_kataster.parquet"
 parquet_precipitation_file = datapath / f"precipitation.parquet"
 
+
 def get_data():
     """
     Fetches and processes data for a range of years, saving the results to files.
 
-    This function retrieves data from a remote source for each year starting from 1976 
-    up to the current year. The data is fetched using HTTP requests, processed, and 
+    This function retrieves data from a remote source for each year starting from 1976
+    up to the current year. The data is fetched using HTTP requests, processed, and
     saved in both Parquet and CSV formats.
 
     Steps:
@@ -39,8 +40,8 @@ def get_data():
     - A CSV file containing unique station information.
 
     Note:
-    - The function assumes the existence of certain global variables such as `params`, 
-      `base_url`, `station_fields`, `value_fields`, `parquet_data_file`, 
+    - The function assumes the existence of certain global variables such as `params`,
+      `base_url`, `station_fields`, `value_fields`, `parquet_data_file`,
     - The function uses pandas for data manipulation and urllib for URL encoding.
 
     Raises:
@@ -80,6 +81,7 @@ def get_data():
     print(f"writing station files: {parquet_station_file.name}")
     df_stations.to_parquet(parquet_station_file)
 
+
 def get_kataster_data():
     base_url = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100182/exports/csv"
     params = {
@@ -92,9 +94,10 @@ def get_kataster_data():
     query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
     full_url = f"{base_url}?{query_string}"
     df = pd.read_csv(full_url, sep=";", low_memory=False)
-    df['catnum45'] = df["catnum45"].str.zfill(10)
+    df["catnum45"] = df["catnum45"].str.zfill(10)
 
     df.to_parquet(parquet_kataster_file)
+
 
 def get_precipitation_data():
     base_url = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100254/exports/csv"
@@ -109,11 +112,12 @@ def get_precipitation_data():
     full_url = f"{base_url}?{query_string}"
     print(full_url)
     df = pd.read_csv(full_url, sep=";", low_memory=False)
-    df['date'] = pd.to_datetime(df['date'])
-    df['jahr']= df['jahr'].astype(int)
+    df["date"] = pd.to_datetime(df["date"])
+    df["jahr"] = df["jahr"].astype(int)
     df = df[df["jahr"] >= 1976]
     df.rename(columns={"rre150d0": "precipitation"}, inplace=True)
     df.to_parquet(parquet_precipitation_file)
+
 
 def fix_station_codes():
     """
@@ -199,13 +203,21 @@ def summerize_data():
 
 def main():
     parser = argparse.ArgumentParser(description="Run data helper functions.")
-    
-    parser.add_argument('--data', action='store_true', help='Get all water level data, this will take a while')
-    parser.add_argument('--fix', action='store_true', help='Run fix_station_codes()')
-    parser.add_argument('--summary', action='store_true', help='Run summerize_data()')
-    parser.add_argument('--kataster', action='store_true', help='Run get_kataster_data()')
-    parser.add_argument('--precip', action='store_true', help='Run get_precipitation_data()')
-    parser.add_argument('--all', action='store_true', help='Execute all functions')
+
+    parser.add_argument(
+        "--data",
+        action="store_true",
+        help="Get all water level data, this will take a while",
+    )
+    parser.add_argument("--fix", action="store_true", help="Run fix_station_codes()")
+    parser.add_argument("--summary", action="store_true", help="Run summerize_data()")
+    parser.add_argument(
+        "--kataster", action="store_true", help="Run get_kataster_data()"
+    )
+    parser.add_argument(
+        "--precip", action="store_true", help="Run get_precipitation_data()"
+    )
+    parser.add_argument("--all", action="store_true", help="Execute all functions")
     args = parser.parse_args()
 
     if args.all:
@@ -227,5 +239,6 @@ def main():
     if args.precip:
         get_precipitation_data()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
